@@ -80,8 +80,8 @@ const translations = {
   }
 };
 
-const qs = s => document.querySelector(s);
-const qsa = s => [...document.querySelectorAll(s)];
+const qs = (s, root = document) => root.querySelector(s);
+const qsa = (s, root = document) => [...root.querySelectorAll(s)];
 
 function applyLanguage(lang) {
   const t = translations[lang] || translations.en;
@@ -115,6 +115,16 @@ function applyLanguage(lang) {
 }
 
 qsa('.lang-btn').forEach(btn=>btn.addEventListener('click',()=>applyLanguage(btn.dataset.lang)));
-qs('.menu-toggle').addEventListener('click',()=>{const nav=qs('#site-nav'); const open=nav.classList.toggle('open'); qs('.menu-toggle').setAttribute('aria-expanded',String(open));});
-qsa('#site-nav a').forEach(a=>a.addEventListener('click',()=>qs('#site-nav').classList.remove('open')));
+const menuToggle = qs('.menu-toggle');
+const siteNav = qs('#site-nav');
+
+function setMenuOpen(open) {
+  siteNav.classList.toggle('open', open);
+  menuToggle.setAttribute('aria-expanded', String(open));
+  menuToggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+}
+
+menuToggle.addEventListener('click',()=>setMenuOpen(!siteNav.classList.contains('open')));
+qsa('#site-nav a').forEach(a=>a.addEventListener('click',()=>setMenuOpen(false)));
+document.addEventListener('keydown',e=>{if(e.key==='Escape') setMenuOpen(false);});
 applyLanguage(localStorage.getItem('delong-language') || 'en');
